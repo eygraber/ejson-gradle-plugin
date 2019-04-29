@@ -46,9 +46,6 @@ class Ejson(
             stdout
                 .toString()
                 .toMap()
-                .apply {
-                    remove("_public_id")
-                }
         }
     }
 }
