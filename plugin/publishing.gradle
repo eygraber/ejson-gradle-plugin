@@ -11,7 +11,7 @@ ext {
   siteUrl = 'https://github.com/eygraber/ejson-gradle-plugin'
   gitUrl = 'https://github.com/eygraber/ejson-gradle-plugin.git'
 
-  libraryVersion = '1.0.1'
+  libraryVersion = Versions.ArtifactVersion
 
   developerId = 'eygraber'
   developerName = 'Eliezer Graber'

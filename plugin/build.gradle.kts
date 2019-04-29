@@ -21,7 +21,7 @@ gradlePlugin {
 }
 
 group = "com.eygraber"
-version = "1.0.1"
+version = Versions.ArtifactVersion
 
 repositories {
     mavenCentral()
