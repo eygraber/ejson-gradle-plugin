@@ -1,3 +1,3 @@
 object Versions {
-    const val ArtifactVersion = "1.0.3"
+    const val ArtifactVersion = "1.0.4"
 }

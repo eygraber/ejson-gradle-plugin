@@ -1,9 +1,15 @@
 package com.eygraber.ejson.gradle
 
-import com.android.build.gradle.BasePlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.LogLevel
+import org.gradle.api.plugins.ExtraPropertiesExtension
+import java.io.File
+
+private data class EjsonError(
+    val variantName: String,
+    val throwable: Throwable
+)
 
 class EjsonPlugin : Plugin<Project> {
 
@@ -12,46 +18,62 @@ class EjsonPlugin : Plugin<Project> {
 
         val ejson = Ejson(project, ejsonExtension)
 
-        project.afterEvaluate { evaluatedProject ->
-            val globalSecrets = ejson.decrypt(secrets = evaluatedProject.file("secrets.ejson"))
+        val globalSecrets = ejson.decrypt(secrets = project.file("secrets.ejson"))
 
-            if (ejsonExtension.loggingEnabled()) project.logger.log(
-                LogLevel.DEBUG,
-                "Ejson: Global Secrets - $globalSecrets"
-            )
+        project.logger.log(
+            LogLevel.DEBUG,
+            "Ejson: Global Secrets - $globalSecrets"
+        )
 
-            if (ejsonExtension.removePublicKey()) globalSecrets.remove("_public_key")
+        var error: EjsonError? = null
 
-            val variantSecrets = mutableMapOf<String, MutableMap<String, Any>>()
-            evaluatedProject.plugins.withType(BasePlugin::class.java).firstOrNull()?.let { plugin ->
-                if (ejsonExtension.loggingEnabled()) project.logger.log(LogLevel.INFO, "Ejson: android plugin added")
-                plugin
-                    .extension
-                    .sourceSets
-                    .names
-                    .forEach { name ->
-                        if (ejsonExtension.loggingEnabled()) project.logger.log(
-                            LogLevel.INFO,
-                            "Ejson: processing android source - $name"
+        globalSecrets.remove("_public_key")
+
+        val variantSecrets = mutableMapOf<String, MutableMap<String, Any>>()
+
+        val dirsWithSecrets = project.file("src").listFiles { f ->
+            f.isDirectory && f.listFiles().find { child ->
+                child.name == "secrets.ejson"
+            } != null
+        }
+
+        dirsWithSecrets
+            .forEach { dir ->
+                val name = dir.name
+
+                project.logger.log(
+                    LogLevel.INFO,
+                    "Ejson: processing android source - $name"
+                )
+
+                try {
+                    ejson.decrypt(
+                        secrets = File(dir, "secrets.ejson")
+                    ).takeIf { it.isNotEmpty() }?.let {
+                        it.remove("_public_key")
+                        variantSecrets[name] = it
+                        project.logger.log(
+                            LogLevel.DEBUG,
+                            "Ejson: $name Secrets - $it"
                         )
-
-                        val ignoreReleaseErrors = ejsonExtension.ignoreVariantErrorsPredicate(name)
-
-                        ejson.decrypt(
-                            secrets = evaluatedProject.file("src/$name/secrets.ejson"),
-                            ignoreErrors = ignoreReleaseErrors
-                        ).takeIf { it.isNotEmpty() }?.let {
-                            if (ejsonExtension.removePublicKey()) it.remove("_public_key")
-                            variantSecrets[name] = it
-                            if (ejsonExtension.loggingEnabled()) project.logger.log(
-                                LogLevel.DEBUG,
-                                "Ejson: $name Secrets - $it"
-                            )
-                        }
                     }
+                }
+                catch (e: Throwable) {
+                    if(error == null) error = EjsonError(name, e)
+                }
             }
 
-            ejsonExtension.onSecretsDecrypted(globalSecrets, variantSecrets)
+        project.extensions.findByType(ExtraPropertiesExtension::class.java)?.let { extra ->
+            extra.set("ejsonGlobalSecrets", globalSecrets)
+            extra.set("ejsonVariantSecrets", variantSecrets)
+        }
+
+        project.afterEvaluate {
+            error?.apply {
+                if(ejsonExtension.onEjsonFailure(variantName)) {
+                    throw throwable
+                }
+            }
         }
     }
 }
