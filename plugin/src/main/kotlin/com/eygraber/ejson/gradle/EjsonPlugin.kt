@@ -8,28 +8,32 @@ import org.gradle.api.logging.LogLevel
 class EjsonPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
-        val ejsonExtension = project.extensions.run {
-            create("ejson", EjsonExtension::class.java)
-        }
+        val ejsonExtension = project.extensions.create("ejson", EjsonExtension::class.java)
 
         val ejson = Ejson(project, ejsonExtension)
 
         project.afterEvaluate { evaluatedProject ->
             val globalSecrets = ejson.decrypt(secrets = evaluatedProject.file("secrets.ejson"))
 
-            if(ejsonExtension.isLoggingEnabled) project.logger.log(LogLevel.INFO, "Ejson: Global Secrets - $globalSecrets")
+            if (ejsonExtension.loggingEnabled()) project.logger.log(
+                LogLevel.DEBUG,
+                "Ejson: Global Secrets - $globalSecrets"
+            )
 
-            if(ejsonExtension.removePublicKey) globalSecrets.remove("_public_key")
+            if (ejsonExtension.removePublicKey()) globalSecrets.remove("_public_key")
 
             val variantSecrets = mutableMapOf<String, MutableMap<String, Any>>()
             evaluatedProject.plugins.withType(BasePlugin::class.java).firstOrNull()?.let { plugin ->
-                if(ejsonExtension.isLoggingEnabled) project.logger.log(LogLevel.INFO, "Ejson: android plugin added")
+                if (ejsonExtension.loggingEnabled()) project.logger.log(LogLevel.INFO, "Ejson: android plugin added")
                 plugin
                     .extension
                     .sourceSets
                     .names
                     .forEach { name ->
-                        if(ejsonExtension.isLoggingEnabled) project.logger.log(LogLevel.INFO, "Ejson: processing android source - $name")
+                        if (ejsonExtension.loggingEnabled()) project.logger.log(
+                            LogLevel.INFO,
+                            "Ejson: processing android source - $name"
+                        )
 
                         val ignoreReleaseErrors = ejsonExtension.ignoreVariantErrorsPredicate(name)
 
@@ -37,9 +41,12 @@ class EjsonPlugin : Plugin<Project> {
                             secrets = evaluatedProject.file("src/$name/secrets.ejson"),
                             ignoreErrors = ignoreReleaseErrors
                         ).takeIf { it.isNotEmpty() }?.let {
-                            if(ejsonExtension.removePublicKey) it.remove("_public_key")
+                            if (ejsonExtension.removePublicKey()) it.remove("_public_key")
                             variantSecrets[name] = it
-                            if(ejsonExtension.isLoggingEnabled) project.logger.log(LogLevel.INFO, "Ejson: $name Secrets - $it")
+                            if (ejsonExtension.loggingEnabled()) project.logger.log(
+                                LogLevel.DEBUG,
+                                "Ejson: $name Secrets - $it"
+                            )
                         }
                     }
             }
