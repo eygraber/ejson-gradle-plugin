@@ -59,13 +59,13 @@ install {
 }
 
 task sourcesJar(type: Jar, dependsOn:classes) {
-  classifier = 'sources'
+  archiveClassifier.set('sources')
   from sourceSets.main.allSource
 }
 
-task javadocsJar(type: Jar, dependsOn:dokka) {
-  classifier = 'javadoc'
-  from dokka
+task javadocsJar(type: Jar, dependsOn:dokkaHtml) {
+  archiveClassifier.set('javadoc')
+  from dokkaHtml
 }
 
 if (JavaVersion.current().isJava8Compatible()) {

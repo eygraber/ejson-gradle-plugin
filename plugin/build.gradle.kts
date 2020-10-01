@@ -1,14 +1,14 @@
-
-import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.net.URL
 
 plugins {
-    kotlin("jvm") version "1.3.31"
+    kotlin("jvm")
+    id("org.jetbrains.dokka") version "1.4.10"
+
     id("java-gradle-plugin")
 
     id("com.github.dcendents.android-maven")
     id("com.jfrog.bintray")
-    id("org.jetbrains.dokka")
 }
 
 gradlePlugin {
@@ -23,23 +23,20 @@ gradlePlugin {
 group = "com.eygraber"
 version = Versions.ArtifactVersion
 
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    implementation(kotlin("stdlib-jdk8"))
-}
-
-tasks.withType<DokkaTask> {
-    outputFormat = "html"
-    outputDirectory = "$buildDir/docs/kdoc"
-    linkMapping {
-        dir = "src/main/java"
-        url = "https://github.com/eygraber/ejson-gradle-plugin/blob/master/library/src/main/java"
-        suffix = "#L"
+tasks.dokkaHtml {
+    dokkaSourceSets {
+        named("main") {
+            sourceLink {
+                localDirectory.set(file("src/main/kotlin"))
+                remoteUrl.set(
+                    URL(
+                        "https://github.com/eygraber/ejson-gradle-plugin/blob/master/library/src/main/java"
+                    )
+                )
+                remoteLineSuffix.set("#L")
+            }
+        }
     }
-    jdkVersion = 8
 }
 
 repositories {
@@ -50,7 +47,7 @@ repositories {
 dependencies {
     compileOnly(gradleApi())
     implementation(kotlin("stdlib-jdk8"))
-    implementation("com.android.tools.build:gradle:3.4.0")
+    implementation("com.android.tools.build:gradle:4.0.1")
 }
 
 defaultTasks("dokka")

@@ -31,11 +31,16 @@ class EjsonPlugin : Plugin<Project> {
 
         val variantSecrets = mutableMapOf<String, MutableMap<String, Any>>()
 
-        val dirsWithSecrets = project.file("src").listFiles { f ->
-            f.isDirectory && f.listFiles().find { child ->
-                child.name == "secrets.ejson"
-            } != null
-        }
+        val dirsWithSecrets =
+            project
+                .file("src")
+                .takeIf { it.exists() }
+                ?.listFiles { f ->
+                    f.isDirectory && f.listFiles().find { child ->
+                        child.name == "secrets.ejson"
+                    } != null
+                }
+                ?: emptyArray()
 
         dirsWithSecrets
             .forEach { dir ->
@@ -57,9 +62,8 @@ class EjsonPlugin : Plugin<Project> {
                             "Ejson: $name Secrets - $it"
                         )
                     }
-                }
-                catch (e: Throwable) {
-                    if(error == null) error = EjsonError(name, e)
+                } catch (e: Throwable) {
+                    if (error == null) error = EjsonError(name, e)
                 }
             }
 
@@ -73,7 +77,7 @@ class EjsonPlugin : Plugin<Project> {
                 if(ejsonExtension.onEjsonFailure(variantName)) {
                     throw throwable
                 }
-            }
+            } ?: ejsonExtension.onSecretsDecrypted()
         }
     }
 }

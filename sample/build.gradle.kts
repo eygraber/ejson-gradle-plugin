@@ -1,9 +1,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.3.31"
+    kotlin("jvm")
     id("com.eygraber.ejson")
-
 }
 
 repositories {
@@ -19,7 +18,7 @@ tasks.withType<KotlinCompile> {
 }
 
 ejson {
-    onSecretsDecrypted = { globalSecrets, _ ->
-        println("!!!!!!!!!!!!!! ${globalSecrets}")
+    onSecretsDecrypted = {
+        println("!!!!!!!!!!!!!! Success")
     }
 }
