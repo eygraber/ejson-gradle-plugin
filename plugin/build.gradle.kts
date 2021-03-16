@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
-    id("org.jetbrains.dokka")
 
     id("java-gradle-plugin")
 }
@@ -18,13 +17,13 @@ gradlePlugin {
 
 repositories {
     google()
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
     compileOnly(gradleApi())
     implementation(kotlin("stdlib-jdk8"))
-    implementation("com.android.tools.build:gradle:4.0.1")
+    implementation("com.android.tools.build:gradle:4.1.2")
 }
 
 tasks.withType<KotlinCompile> {
