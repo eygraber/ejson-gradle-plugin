@@ -2,11 +2,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
-    id("com.eygraber.ejson")
+//    id("com.eygraber.ejson") version "1.0.5"
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
@@ -17,8 +17,8 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-ejson {
-    onSecretsDecrypted = {
-        println("!!!!!!!!!!!!!! Success")
-    }
-}
+//ejson {
+//    onSecretsDecrypted = {
+//        println("!!!!!!!!!!!!!! Success")
+//    }
+//}
