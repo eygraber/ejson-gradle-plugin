@@ -2,16 +2,16 @@ buildscript {
     repositories {
         mavenLocal()
         google()
-        jcenter()
+        mavenCentral()
     }
 
     dependencies {
-        classpath("com.github.dcendents:android-maven-gradle-plugin:2.1")
-        classpath("com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4")
-        classpath("com.eygraber:ejson-gradle-plugin:${Versions.ArtifactVersion}")
+        classpath("com.vanniktech:gradle-maven-publish-plugin:0.14.2")
+        classpath("org.jetbrains.dokka:dokka-gradle-plugin:1.4.20")
+        classpath("com.eygraber:ejson-gradle-plugin:${findProperty("VERSION_NAME")}")
     }
 }
 
 plugins {
-    kotlin("jvm") version "1.4.10" apply false
+    kotlin("jvm") version "1.4.31" apply false
 }
