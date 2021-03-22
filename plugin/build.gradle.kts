@@ -24,7 +24,7 @@ repositories {
 dependencies {
     compileOnly(gradleApi())
     implementation(kotlin("stdlib-jdk8"))
-    implementation("com.android.tools.build:gradle:4.1.2")
+    implementation("com.android.tools.build:gradle:4.1.3")
 }
 
 tasks.withType<KotlinCompile> {
