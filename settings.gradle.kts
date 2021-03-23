@@ -1,6 +1,7 @@
 rootProject.name = "ejson-gradle"
 
-include(":plugin", ":sample")
+include(":plugin")
+//include(":sample")
 
 pluginManagement {
     repositories {
