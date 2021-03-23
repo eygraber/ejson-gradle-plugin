@@ -72,10 +72,12 @@ class EjsonPlugin : Plugin<Project> {
             extra.set("ejsonVariantSecrets", variantSecrets)
         }
 
-        error?.apply {
-            if(ejsonExtension.onEjsonFailure(variantName)) {
-                throw throwable
-            }
-        } ?: ejsonExtension.onSecretsDecrypted()
+        project.afterEvaluate {
+            error?.apply {
+                if(ejsonExtension.onEjsonFailure(variantName)) {
+                    throw throwable
+                }
+            } ?: ejsonExtension.onSecretsDecrypted()
+        }
     }
 }
